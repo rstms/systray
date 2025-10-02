@@ -46,18 +46,18 @@ type Menu struct {
 	debug       bool
 }
 
-func NewMenu(title, tooltip string, iconData []byte) *Menu {
+func NewMenu(title, tooltip string, iconData []byte, clicked chan *MenuItem, exited chan struct{}) *Menu {
 	m := Menu{
-		Title:   title,
-		Tooltip: tooltip,
-		//Clicked:     make(chan *MenuItem, 1),
-		//Exited:      make(chan struct{}, 1),
+		Title:       title,
+		Tooltip:     tooltip,
+		Clicked:     clicked,
+		Exited:      exited,
 		iconData:    iconData,
 		clickMux:    make(chan *MenuItem, 1),
 		exitHandler: make(chan struct{}, 1),
 		items:       []*MenuItem{},
 		qid:         -1,
-		debug:       true,
+		debug:       false,
 	}
 	if len(iconData) == 0 {
 		m.iconData = DefaultIconData
@@ -86,15 +86,9 @@ func (m *Menu) Start() error {
 	return nil
 }
 
-func (m *Menu) Run(clicked chan *MenuItem, exited chan struct{}) error {
+func (m *Menu) Run() error {
 	if m.debug {
 		log.Printf("Menu.Run: started=%v stopped=%v\n", m.started, m.stopped)
-	}
-	if clicked != nil {
-		m.Clicked = clicked
-	}
-	if exited != nil {
-		m.Exited = exited
 	}
 	err := m.Start()
 	if err != nil {
@@ -112,12 +106,10 @@ func (m *Menu) Run(clicked chan *MenuItem, exited chan struct{}) error {
 
 func (m *Menu) handler() {
 	if m.debug {
-		defer log.Println("Menu handler exit")
+		log.Println("Menu.handler start")
+		defer log.Println("Menu.handler exit")
 	}
 	defer m.wg.Done()
-	if m.debug {
-		log.Println("menu handler start")
-	}
 	for {
 		select {
 		case item := <-m.clickMux:

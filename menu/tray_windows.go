@@ -143,7 +143,7 @@ func (i *MenuItem) handler() {
 			i.menu.clickMux <- i
 			if i.Id == i.menu.qid {
 				if i.menu.debug {
-					log.Println("Quit Item clicked; calling systray.Quit()")
+					log.Println("Quit item clicked")
 				}
 				i.exitHandler <- struct{}{}
 			}
