@@ -1,10 +1,9 @@
-//go:build linux
+//go:build !windows
 
 package menu
 
 import (
 	_ "embed"
-	"fmt"
 )
 
 //go:embed icon.png
