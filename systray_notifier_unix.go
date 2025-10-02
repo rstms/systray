@@ -1,8 +1,8 @@
 package systray
 
 import (
-	"fyne.io/systray/internal/generated/notifier"
 	"github.com/godbus/dbus/v5"
+	"github.com/rstms/systray/internal/generated/notifier"
 )
 
 type leftRightNotifierItem struct {

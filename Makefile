@@ -1,18 +1,72 @@
-tag-changelog: require-version require-gh-token
-	echo "Tagging..." && \
-	git tag -a "$$VERSION" -f --annotate -m"Tagged $$VERSION" && \
-	git push --tags -f && \
-	git checkout master && \
-	git pull && \
-	github_changelog_generator --no-issues --max-issues 100 --token "${GH_TOKEN}" --user getlantern --project systray && \
-	git add CHANGELOG.md && \
-	git commit -m "Updated changelog for $$VERSION" && \
-	git push origin HEAD && \
-	git checkout -
+# go makefile
 
-guard-%:
-	 @ if [ -z '${${*}}' ]; then echo 'Environment variable $* not set' && exit 1; fi
+program != basename $$(pwd)
+version != cat VERSION
+org = rstms
 
-require-version: guard-VERSION
+default: build
 
-require-gh-token: guard-GH_TOKEN
+include make/common.mk
+
+build: $(binary)
+
+$(binary): fmt
+	fix go build . ./...
+	go build
+
+fmt: go.sum
+	fix go fmt . ./...
+
+go.mod:
+	go mod init
+
+go.sum: go.mod
+	go mod tidy
+
+install: build
+	go install
+
+test: fmt
+	go test -v -failfast . ./...
+
+debug: fmt
+	go test -v -failfast -count=1 -run $(test) . ./...
+
+release:
+	$(gitclean)
+	@$(if $(update),gh release delete -y v$(version),)
+	gh release create v$(version) --notes "v$(version)"
+
+dist: dist/$(release_binary)
+
+dist/$(release_binary): $(binary)
+	mkdir -p dist
+	scp $< $(dist_target)/$(release_binary)
+	scp $< $(dist_target)/$(dist_binary)
+	cp $< $@
+
+release-upload: dist
+	cd dist; gh release upload $(latest_release) $(release_binary) $(CLOBBER)
+
+update-modules:
+	@echo checking dependencies for updated versions 
+	@$(foreach module,$(rstms_modules),go get $(module)@$(call latest_module_release,$(module));)
+	curl -Lso .proxy https://raw.githubusercontent.com/rstms/go-common/master/proxy_common_go
+	@$(foreach s,$(common_go),sed <.proxy >$(s) 's/^package cmd/package $(lastword $(subst /, ,$(dir $(s))))/'; ) rm .proxy
+	$(MAKE)
+
+clean:
+	rm -f $(binary) *.core 
+	go clean
+	rm -rf dist && mkdir dist
+
+sterile: clean
+	go clean -i || true
+	go clean
+	go clean -cache
+	go clean -modcache
+	rm -f go.mod go.sum
+	rm -rf ~/.cache/netboot
+
+show-vars:
+	@$(foreach var,$(all_variables),echo $(var)=$($(var));)
