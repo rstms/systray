@@ -1,5 +1,7 @@
 //go:build openbsd
 
+// FIXME: test if this works on openbsd with the new upstream
+
 package menu
 
 import (

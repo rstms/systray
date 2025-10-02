@@ -2,6 +2,8 @@
 
 package menu
 
+// FIXME: only the icon differs between windows and linux
+
 import (
 	_ "embed"
 	"fmt"

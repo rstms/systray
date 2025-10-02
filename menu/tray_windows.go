@@ -56,7 +56,6 @@ func (m *Menu) startup() error {
 
 func (m *Menu) shutdown() error {
 	if m.debug {
-
 		log.Println("Menu.shutdown")
 	}
 	if !m.started {
@@ -81,6 +80,10 @@ func (m *Menu) onReady() {
 	systray.SetTitle(m.Title)
 	systray.SetTooltip(m.Title)
 	systray.SetIcon(m.iconData)
+
+	if m.qid < 0 {
+		m.AddQuitItem("Quit", "Shutdown "+m.Title)
+	}
 
 	for _, item := range m.items {
 		switch item.Type {

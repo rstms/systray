@@ -33,8 +33,8 @@ type Menu struct {
 	Title       string
 	Tooltip     string
 	iconData    []byte
-	Clicked     chan *MenuItem
-	Exited      chan struct{}
+	Clicked     chan *MenuItem // caller <- menu when items clicked
+	Exited      chan struct{}  // caller <- menu when menu has exited
 	clickMux    chan *MenuItem
 	exitHandler chan struct{}
 	items       []*MenuItem
@@ -64,7 +64,6 @@ func NewMenu(title, tooltip string, iconData []byte) *Menu {
 	}
 	m.AddItem(title, tooltip)
 	m.AddSeparator()
-	m.AddQuitItem("Quit", "Shutdown "+title)
 	return &m
 }
 
