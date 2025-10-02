@@ -8,9 +8,6 @@ import (
 	_ "embed"
 )
 
-//go:embed icon.png
-var DefaultIconData []byte
-
 type SystrayMenuItem struct {
 	Title   string
 	Tooltip string
