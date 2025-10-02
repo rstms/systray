@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-const Version = "0.0.9"
+const Version = "0.0.10"
 
 type MenuItemType int
 
