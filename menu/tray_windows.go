@@ -129,6 +129,7 @@ func (i *MenuItem) start(trayItem *SystrayMenuItem) {
 
 func (i *MenuItem) handler() {
 	defer i.menu.wg.Done()
+	defer systray.Quit()
 	if i.menu.debug {
 		defer log.Printf("MenuItem handler exit %d %s\n", i.Id, i.Title)
 		log.Printf("MenuItem handler start %d %s\n", i.Id, i.Title)
@@ -139,13 +140,13 @@ func (i *MenuItem) handler() {
 			if i.menu.debug {
 				log.Printf("received ClickedCh:  %d %s\n", i.Id, i.Title)
 			}
+			i.menu.clickMux <- i
 			if i.Id == i.menu.qid {
 				if i.menu.debug {
 					log.Println("Quit Item clicked; calling systray.Quit()")
 				}
-				systray.Quit()
+				i.exitHandler <- struct{}{}
 			}
-			i.menu.clickMux <- i
 		case <-i.exitHandler:
 			return
 		}
