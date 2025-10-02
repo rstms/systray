@@ -1,5 +1,3 @@
-//go:build openbsd
-
 package menu
 
 import (
@@ -14,7 +12,9 @@ func TestMenu(t *testing.T) {
 	title := "Test Title"
 	tooltip := "The Tooltray Test Program"
 
-	menu := NewMenu(title, tooltip, []byte{})
+	clicked := make(chan *MenuItem, 1)
+	exited := make(chan struct{}, 1)
+	menu := NewMenu(title, tooltip, []byte{}, clicked, exited)
 	err := menu.Start()
 	require.Nil(t, err)
 	timer := time.NewTimer(3 + time.Second)

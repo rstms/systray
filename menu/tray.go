@@ -1,17 +1,13 @@
-//go:build windows
+//go:build !openbsd
 
 package menu
 
 import (
-	_ "embed"
 	"fmt"
 	"github.com/rstms/systray"
 	"log"
 	"runtime"
 )
-
-//go:embed icon.ico
-var DefaultIconData []byte
 
 type SystrayMenuItem struct {
 	item *systray.MenuItem
